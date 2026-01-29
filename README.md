@@ -1,41 +1,32 @@
-# Old Persian Lithography Writing Interface (رابط کاربری نگارش چاپ سنگی)
+# Vintage Persian Writing Interface
+# محیط نوشتار فارسی قدیمی
 
-A web-based writing tool designed to simulate the aesthetic of old Persian lithography books (چاپ سنگی). This interface provides a distraction-free, immersive environment for writing in Persian with advanced formatting and export capabilities.
+یه ابزار ساده و باحال برای اینکه حس و حال نوشتن توی کتاب‌های قدیمی رو تجربه کنی. فقط فایل `index.html` رو باز کن و لذت ببر!
 
-**Author:** Pouya Sadeghi
+## ویژگی‌ها:
+- **ذخیره خودکار:** نگران نباش، هرچی بنویسی همون لحظه توی مرورگرت سیو میشه.
+- **استایل‌های باحال:** با دکمه‌ها یا شورتکات‌ها متن رو بولد کن، شعریش کن یا حالت دیالوگ بهش بده.
+- **خروجی PDF:** با زدن `Ctrl + S` (یا دکمه پرینت) میتونی یه فایل PDF ترتمیز و با فونت‌های درست تحویل بگیری (بهترین حالت اینه که توی تنظیمات پرینت، هدر و فوتر رو برداری).
+- **جوهر و شمع:** می‌تونی افکت جوهر پخش‌شده روی کاغذ یا نور شمع که دنبال موس میاد رو فعال کنی تا فضا واقعی‌تر بشه.
+- **رنگ کاغذ:** کلی رنگ کاغذ قدیمی آماده هست، یا خودت رنگ دلخواهت رو بساز؛ ما هم رنگای خودتو یادمون میمونه.
+- **تایپ هوشمند:** نیم‌فاصله‌ها رو خودکار درست میکنه (مثلاً «می روم» میشه «می‌روم»).
 
-## Features
+## میانبرها (که کارتو سریع میکنه):
+- **Alt + I:** روشن/خاموش کردن جوهر
+- **Alt + C:** روشن/خاموش کردن شمع
+- **Alt + V:** تغییر حالت تک‌صفحه/دوصفحه
+- **Alt + P:** افزودن عکس
+- **Alt + R:** ادیتور متن خام
+- **انتخاب متن + ۱:** بولد کردن
+- **انتخاب متن + ۲:** استایل دیالوگ
+- **انتخاب متن + ۳:** استایل شعر
+- **F1:** لیست همه میانبرها
 
-### 🖌️ Visual & Aesthetic
-- **Lithography Style:** Simulates aged vintage paper with ink bleed, noise, and texture.
-- **Low Quality Mode:** A toggleable filter that adds blur, high contrast, and sepia tones to mimic damaged or very old scanned documents.
-- **Folded Book View:** In single-page mode, the interface renders a 3D folded book effect with realistic shadows.
-- **Custom Fonts:** Includes a selection of beautiful Persian fonts (Amiri, Gulzar, Lateef, Scheherazade New, Vazirmatn).
-- **Ink Color:** Customizable dark ink color with subtle shadows for realism.
+## نحوه استفاده:
+1. فایل `index.html` رو با مرورگر باز کن.
+2. شروع کن به نوشتن!
+3. حالشو ببر.
 
-### ✍️ Writing Experience
-- **Auto-Pagination:** Text automatically flows to the next page as you write, just like a real word processor.
-- **Persian Smart Spacing:** Automatically converts standard spaces to Zero Width Non-Joiners (نیم‌فاصله) for correct Persian grammar (e.g., converts `می روم` to `می‌روم` and `کفش ها` to `کفش‌ها`).
-- **Mode Indicators:** Visual cues for specific styles like "Dialogue" or "Poetry".
-- **Raw Text Editor:** A "Raw Text" mode allows for fast bulk editing and copying/pasting of large texts.
+---
+**تکنولوژی‌ها:** HTML, CSS, JavaScript خالص. بدون نیاز به نصب هیچی.
 
-### 🛠️ Functionality
-- **Auto-Save:** Your work is automatically saved to the browser's local storage.
-- **PDF Export:** Press `Ctrl+S` or the Save button to export your work as a clean, margin-free PDF (via Print).
-- **View Modes:** Toggle between Single Page (focused) and Double Page (book spread) views.
-- **Animated Navigation:** Smooth page-turn animations.
-
-## Usage
-
-1. Open `index.html` in any modern web browser.
-2. Start typing in the main text area.
-3. Use the **Bottom Toolbar** to navigate pages, changing view modes, or toggle "Low Quality".
-4. Use the **Top Toolbar** to apply styles (Bold, Dialogue, Poetry), change fonts, or Save.
-5. **Shortcuts:**
-    - `Ctrl+S`: Print/Save as PDF.
-
-## Technical Details
-
-- Built with **Vanilla HTML, CSS, and JavaScript**.
-- No external frameworks or dependencies required.
-- Uses `contentEditable` for the rich text interface and complex DOM manipulation for auto-pagination.

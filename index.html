@@ -7,309 +7,51 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Gulzar&family=Lateef&family=Scheherazade+New:wght@400;700&family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --paper-color: #f4e4bc;
-            --ink-color: rgba(30, 30, 30, 0.85);
-            --ink-shadow: 0.3px 0.3px 1px rgba(0,0,0,0.2); 
-            --spine-shadow: linear-gradient(to right, 
-                rgba(0,0,0,0.05) 0%, 
-                rgba(20, 15, 10, 0.15) 20%, 
-                rgba(40, 30, 20, 0.25) 50%, 
-                rgba(20, 15, 10, 0.15) 80%, 
-                rgba(0,0,0,0.05) 100%);
-            --font-current: 'Amiri', serif;
-        }
-
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #1a1a1a;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            font-family: var(--font-current);
-            transition: filter 0.3s;
-        }
-
-        body.low-quality {
-            filter: contrast(1.4) sepia(0.6) blur(0.6px) brightness(0.9) grayscale(0.2);
-        }
-
-        .vignette {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            background: radial-gradient(circle, transparent 55%, rgba(0,0,0,0.85) 130%);
-            z-index: 100;
-        }
-
-        /* Book Container */
-        .book-container {
-            width: 90vw;
-            height: 90vh;
-            background-color: var(--paper-color);
-            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
-            border-radius: 4px;
-            display: flex;
-            position: relative;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.6);
-            overflow: hidden;
-            transition: width 0.5s ease, box-shadow 0.5s ease, transform 0.5s ease;
-        }
-
-        /* 4. Folded Book Look (Single View) */
-        .book-container.single-view {
-            width: min(600px, 85vw); 
-            /* Folded effect: Spine on the left (RTL -> reading Right page), stack of paper behind */
-            box-shadow: 
-                inset 25px 0 40px -10px rgba(0,0,0,0.15), /* Spine inner shadow */
-                -5px 5px 10px rgba(0,0,0,0.3), /* Main drop shadow */
-                -12px 12px 0 -2px #e6d6b0, /* First paper layer */
-                -13px 13px 2px -2px rgba(0,0,0,0.2), /* Shadow 1 */
-                -24px 24px 0 -4px #dccca0, /* Second paper layer */
-                -25px 25px 15px -4px rgba(0,0,0,0.4); /* Deep shadow */
-            transform: perspective(1000px) rotateY(-1deg); /* Slight 3D tilt */
-            border-left: 1px solid rgba(0,0,0,0.1);
-            margin: 0 auto; /* Center visually */
-        }
-        
-        .book-container.single-view .spine-overlay {
-            /* In folded mode, the spine overlay becomes the "fold" shadow */
-            width: 60px;
-            left: 0;
-            top: 0;
-            transform: none;
-            background: linear-gradient(to right, rgba(0,0,0,0.2) 0%, transparent 100%);
-            z-index: 50;
-            pointer-events: none;
-            display: block !important;
-        }
-        
-        .book-container.single-view .page {
-            border-right: none;
-            flex: 0 0 100%;
-            max-width: 100%;
-            /* Animation handling */
-            transition: opacity 0.4s ease, transform 0.4s ease;
-        }
-
-        .spine-overlay {
-            position: absolute;
-            top: 0; left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 100%;
-            background: var(--spine-shadow);
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        /* 1. Animation helper classes */
-        .page-turn-anim {
-            opacity: 0;
-            transform: translateY(10px) scale(0.98);
-        }
-        
-        .page {
-            width: 50%;
-            flex-shrink: 0;
-            flex-grow: 0;
-            padding: 3.5rem 3rem 4rem;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.06);
-            border-right: 1px solid rgba(0,0,0,0.02);
-            /* Visibility & Anim */
-            transition: opacity 0.5s cubic-bezier(0.4, 0.0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            height: 100%;
-        }
-
-        .page.hidden-page {
-            position: absolute;
-            top: 0;
-            left: -9999px; 
-            visibility: hidden; 
-            width: 50%;
-            opacity: 0; 
-        }
-        
-        .book-container.single-view .page.hidden-page { width: 100%; }
-        
-        .page-placeholder {
-            width: 50%;
-            flex-shrink: 0;
-            background: transparent;
-        }
-
-        .page-border {
-            position: absolute;
-            top: 1.2rem; bottom: 1.2rem; left: 1.2rem; right: 1.2rem;
-            border: 2px double rgba(60, 50, 40, 0.12);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .content {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            height: 100%;
-            direction: rtl;
-            text-align: justify;
-            text-align-last: right;
-            font-size: 1.3rem; 
-            line-height: 2.2;
-            color: var(--ink-color);
-            text-shadow: var(--ink-shadow);
-            outline: none;
-            white-space: pre-wrap;
-            overflow-wrap: break-word;
-        }
-
-        .dialogue-style { display: block; margin-right: 1.5rem; position: relative; font-weight: bold; }
-        .dialogue-style::before { content: "«"; position: absolute; right: -1.2rem; color: rgba(60, 20, 10, 0.6); }
-        .dialogue-style::after { content: "»"; color: rgba(60, 20, 10, 0.6); }
-
-        .poetry-style {
-            display: block; text-align: center; text-align-last: center; margin: 1.5rem 2rem;
-            padding: 0 1rem; font-family: 'Gulzar', 'Amiri', serif; font-size: 1.4rem;
-            background: rgba(0,0,0,0.03); border-radius: 8px; line-height: 2.5;
-        }
-
-        /* Toolbars */
-        .toolbar-trigger-zone {
-            position: fixed; left: 0; width: 100%; height: 50px; z-index: 200;
-            display: flex; align-items: center;
-        }
-        .toolbar-top { top: 0; justify-content: center; align-items: flex-start; padding-top: 10px; }
-        .toolbar-bottom { bottom: 0; justify-content: center; align-items: flex-end; padding-bottom: 20px; height: 80px;}
-
-        .controls {
-            background: rgba(25, 20, 15, 0.95); padding: 8px 16px; border-radius: 12px;
-            display: flex; gap: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(8px);
-            align-items: center; transform: translateY(-150%); transition: transform 0.3s ease, opacity 0.3s; opacity: 0;
-        }
-        .controls.bottom { transform: translateY(150%); }
-        .toolbar-trigger-zone:hover .controls { transform: translateY(0); opacity: 1; }
-
-        button, select {
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);
-            color: #e0e0e0; padding: 6px 12px; font-family: 'Vazirmatn', sans-serif;
-            font-size: 0.8rem; cursor: pointer; border-radius: 6px; transition: all 0.2s;
-        }
-        button:hover, select:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.5); }
-        select { padding-left: 25px; }
-
-        hr.divider { border: 0; border-left: 1px solid rgba(255,255,255,0.2); height: 20px; margin: 0 5px; }
-
-        .mode-indicator {
-            position: fixed; bottom: 90px; right: 20px; background: rgba(0,0,0,0.6);
-            color: #d4a04d; padding: 8px 15px; border-radius: 8px; font-family: 'Vazirmatn';
-            font-size: 0.9rem; pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 150;
-        }
-        .mode-indicator.active { opacity: 1; }
-        
-        .auto-save-toast {
-            position: fixed; top: 20px; left: 20px; background: rgba(0,100,0,0.7);
-            color: white; padding: 5px 10px; border-radius: 4px; font-family: 'Vazirmatn';
-            font-size: 0.8rem; pointer-events: none; opacity: 0; transition: opacity 0.5s; z-index: 200;
-        }
-
-        /* Raw Text Modal */
-        .raw-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(10, 10, 10, 0.95); z-index: 500;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            padding: 2rem; backdrop-filter: blur(5px);
-        }
-        .raw-modal.active { display: flex; }
-        
-        .raw-textarea {
-            width: 80%; height: 70%;
-            background: #1a1a1a; color: #e0e0e0;
-            border: 1px solid #444; border-radius: 8px;
-            padding: 1rem; font-family: 'Vazirmatn', sans-serif;
-            font-size: 1rem; line-height: 1.8;
-            resize: none; direction: rtl;
-        }
-        .raw-textarea:focus { outline: 2px solid #d4a04d; }
-        
-        .raw-controls {
-            margin-top: 1rem; display: flex; gap: 1rem;
-        }
-
-        /* 3. PDF Save Style */
-        @media print {
-            @page {
-                size: A4;
-                margin: 0;
-            }
-            body { 
-                background-color: transparent !important; 
-                margin: 0 !important; padding: 0 !important; 
-                display: block !important; height: auto !important; 
-                overflow: visible !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                filter: none !important;
-            }
-            .vignette, .toolbar-trigger-zone, .mode-indicator, .auto-save-toast { display: none !important; }
-            
-            .book-container {
-                width: 100% !important;
-                height: auto !important;
-                box-shadow: none !important;
-                border: none !important;
-                margin: 0 !important;
-                display: block !important;
-                border-radius: 0;
-                transform: none !important; /* Remove folded 3D effect */
-                background-image: none !important; /* Usually better to print clean, but user asked for STYLE */
-                background-color: var(--paper-color) !important;
-            }
-            
-            .spine-overlay { display: none !important; }
-            
-            .page {
-                display: block !important;
-                page-break-after: always !important;
-                page-break-inside: avoid !important;
-                min-height: 100vh !important;
-                width: 100% !important;
-                margin: 0 !important;
-                border: none !important;
-                padding: 2cm !important;
-                position: relative !important;
-                left: 0 !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                /* Background texture for pages in print */
-                background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E") !important;
-                background-color: var(--paper-color) !important;
-                color: black !important; /* Better contrast for print usually, but sticking to ink color */
-            }
-            
-            .content {
-                color: var(--ink-color) !important;
-                text-shadow: none !important;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="candle-overlay" id="candleLayer"></div>
+    
+    <!-- Undo Toast -->
+    <div id="undoToast" class="undo-toast">
+        <span>تصویر حذف شد</span>
+        <button class="undo-btn" onclick="document.execCommand('undo'); hideUndoToast();">بازگشت</button>
+        <button style="background:none; border:none; color:#aaa; cursor:pointer;" onclick="hideUndoToast()">×</button>
+    </div>
+
+    <!-- Project Sidebar -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()" title="پروژه‌ها">☰</button>
+    <div class="project-sidebar" id="projectSidebar">
+        <h3 style="color:#d4a04d; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">پروژه‌ها</h3>
+        <button onclick="createNewProject()" style="background:#d4a04d; color:#000; border:none; padding:10px; border-radius:6px; cursor:pointer; width:100%; margin-bottom:20px; font-weight:bold;">+ پروژه جدید</button>
+        <div id="projectList" style="overflow-y: auto; flex: 1;"></div>
+    </div>
+    
+    <!-- Hover Navs -->
+    <div class="nav-zone prev" onclick="prevPage()"></div>
+    <div class="nav-zone next" onclick="nextPage()"></div>
+
+    <!-- SVG Filter for Ink -->
+    <svg style="display: none;">
+        <defs>
+            <filter id="ink-bleed">
+                <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.0" />
+            </filter>
+        </defs>
+    </svg>
+
     <div class="vignette"></div>
     <div class="mode-indicator" id="modeIndicator">--</div>
+    
+    <!-- Context Format Panel -->
+    <div id="contextPanel" class="context-panel">
+        <span style="color: #ccc; font-size: 0.8rem; margin-left:10px;">میانبر:</span>
+        <button onclick="formatStyle('bold')"><b>۱. بولد</b></button>
+        <button onclick="applyClass('dialogue-style')">۲. گفتگو</button>
+        <button onclick="applyClass('poetry-style')">۳. شعر</button>
+    </div>
+
     <div class="auto-save-toast" id="saveToast">ذخیره خودکار انجام شد</div>
 
     <!-- Raw Text Modal -->
@@ -322,12 +64,24 @@
         </div>
     </div>
 
+    <!-- Grid Overview Modal -->
+    <div id="gridOverview" class="grid-overview">
+        <div class="grid-header">
+            <h3>نمای کلی صفحات</h3>
+            <button onclick="toggleGridView()" class="close-grid">×</button>
+        </div>
+        <div id="gridContainer" class="grid-container"></div>
+    </div>
+
     <!-- Top Toolbar -->
     <div class="toolbar-trigger-zone toolbar-top">
         <div class="controls">
-            <button onclick="formatStyle('bold')" title="کلفت">B</button>
+            <button onclick="formatStyle('bold')" title="بولد">B</button>
             <button onclick="applyClass('dialogue-style')" title="حالت گفتگو">گفتگو</button>
             <button onclick="applyClass('poetry-style')" title="حالت شعر">شعر</button>
+            <hr class="divider">
+            <button onclick="triggerImageUpload()" title="افزودن عکس (Alt+P)">عکس 📷</button>
+            <input type="file" id="imgInput" accept="image/*" style="display:none;" onchange="handleImageUpload(this)">
             <hr class="divider">
             <select id="fontSelect" onchange="changeFont(this.value)">
                 <option value="'Amiri', serif">امیری</option>
@@ -344,418 +98,64 @@
     <!-- Bottom Panel -->
     <div class="toolbar-trigger-zone toolbar-bottom">
         <div class="controls bottom">
-            <button onclick="prevPage()">❮ صفحه قبل</button>
-            <span id="pageInfo" style="font-size: 0.8rem; color: #bbb; min-width: 60px; text-align: center;">۱ / ۱</span>
-            <button onclick="nextPage()">صفحه بعد ❯</button>
-            <hr class="divider">
-            <button onclick="toggleView()" id="viewBtn">تک صفحه‌ای</button>
-            <button onclick="toggleLowQuality()" id="lqBtn">کیفیت پایین</button>
-            <button onclick="openRawMode()" title="ویرایش متن خام">متن خام</button>
-            <hr class="divider">
-            <input type="color" id="paperColor" value="#f4e4bc" onchange="changePaper(this.value)" title="رنگ کاغذ" style="width: 30px; height: 30px; padding: 0; border: none; cursor: pointer;">
+            <div class="shortcut-info" id="shortcutInfoBar">
+                <span><span class="shortcut-key">Alt+I</span> جوهر</span>
+                <span><span class="shortcut-key">Alt+C</span> شمع</span>
+                <span><span class="shortcut-key">Alt+V</span> نما</span>
+                <span><span class="shortcut-key">Alt+P</span> عکس</span>
+                <span><span class="shortcut-key">Alt+R</span> خام</span>
+            </div>
+            
+            <div style="display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%;">
+                <button onclick="prevPage()">❮ قبل</button>
+                <span id="pageInfo" style="font-size: 0.8rem; color: #bbb; min-width: 50px; text-align: center;">۱ / ۱</span>
+                <button onclick="nextPage()">بعد ❯</button>
+                <hr class="divider">
+                <button onclick="toggleView()" id="viewBtn">تک</button>
+                <button onclick="toggleLowQuality()" id="lqBtn">کیفیت پایین</button>
+                <hr class="divider">
+                <button onclick="toggleInkMode()" id="inkBtn" title="جوهر (Alt+I)">جوهر</button>
+                <button onclick="toggleCandle()" id="candleBtn" title="شمع (Alt+C)">شمع</button>
+                <button onclick="openRawMode()" title="متن خام (Alt+R)">خام</button>
+                <button onclick="toggleGridView()" title="نمای کلی صفحات">نمای کلی</button>
+                <hr class="divider">
+                
+                <!-- Color Palette (Inline Row) -->
+                 <div class="color-picker-row" style="display: flex; align-items: center; gap: 8px; margin-right: 5px;">
+                     <!-- Presets -->
+                     <button class="color-preset" style="background:#f4e4bc;" onclick="setPaperPreset('#f4e4bc', this)" title="پیش‌فرض"></button>
+                     <button class="color-preset" style="background:#e8dcca;" onclick="setPaperPreset('#e8dcca', this)" title="کاغذ قدیمی"></button>
+                     <button class="color-preset" style="background:#dfd3c3;" onclick="setPaperPreset('#dfd3c3', this)" title="تیره"></button>
+                     <button class="color-preset" style="background:#fcf5e5;" onclick="setPaperPreset('#fcf5e5', this)" title="روشن"></button>
+                     <button class="color-preset" style="background:#d8c8b0;" onclick="setPaperPreset('#d8c8b0', this)" title="کهنه"></button>
+                     
+                     <div id="paletteContainer" style="display:flex; gap:8px; align-items:center;">
+                         <!-- Custom colors will be added here via JS -->
+                         
+                        <div style="width: 24px; height: 24px; border-radius: 50%; overflow: hidden; border: 1px solid rgba(255,255,255,0.3);position: relative;">
+                             <input type="color" id="paperColor" value="#f4e4bc" onchange="addCustomColor(this.value)" title="رنگ دلخواه" 
+                                style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; padding: 0; border: none; cursor: pointer;">
+                        </div>
+                     </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Book -->
     <div class="book-container" id="bookContainer">
+        <div class="margin-zone left"></div>
+        <div class="margin-zone right"></div>
         <div class="spine-overlay"></div>
         <article class="page" id="page-0">
             <div class="page-border"></div>
             <div class="content" contenteditable="true" spellcheck="false" placeholder="بنویسید..."></div>
+            <div class="page-number">۰</div>
         </article>
         <div class="page-placeholder" id="pagePlaceholder" style="display:none;"></div>
     </div>
 
-    <script>
-        let currentPageIndex = 0;
-        let isSingleView = false;
-        
-        // --- Auto Save & Restore ---
-        const SAVE_KEY = 'vintage_persian_autosave';
-        
-        function saveToLocal() {
-            const pages = getAllPages().map(p => p.querySelector('.content').innerHTML);
-            const data = {
-                pages: pages,
-                bgColor: document.documentElement.style.getPropertyValue('--paper-color'),
-                font: document.documentElement.style.getPropertyValue('--font-current'),
-                date: new Date().getTime()
-            };
-            localStorage.setItem(SAVE_KEY, JSON.stringify(data));
-            
-            // Show toast
-            const toast = document.getElementById('saveToast');
-            toast.style.opacity = '1';
-            setTimeout(() => toast.style.opacity = '0', 2000);
-        }
+    <script src="app.js"></script>
 
-        function restoreFromLocal() {
-            const saved = localStorage.getItem(SAVE_KEY);
-            console.log('Restoring data...');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    // Clear existing pages except 0 (rebuild)
-                    const container = document.getElementById('bookContainer');
-                    const pages = getAllPages();
-                    pages.forEach((p, i) => { if(i>0) p.remove(); });
-                    
-                    data.pages.forEach((html, index) => {
-                        let page;
-                        if (index === 0) page = document.getElementById('page-0');
-                        else page = createPage();
-                        
-                        page.querySelector('.content').innerHTML = html;
-                    });
-                    
-                    if(data.bgColor) changePaper(data.bgColor);
-                    if(data.font) {
-                        changeFont(data.font);
-                        document.getElementById('fontSelect').value = data.font;
-                    }
-
-                } catch(e) { console.error('Error restoring', e); }
-            }
-        }
-        
-        // --- 3. Save PDF (Trigger Print) ---
-        document.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
-                e.preventDefault();
-                saveFile();
-            }
-            detectMode();
-        });
-        document.addEventListener('mouseup', detectMode);
-        document.addEventListener('keyup', detectMode);
-
-        function saveFile() {
-             // Browser Print is the best way to get visual PDF
-             window.print();
-        }
-
-        // --- 2. View Toggle ---
-        function toggleView() {
-            isSingleView = !isSingleView;
-            const container = document.getElementById('bookContainer');
-            const btn = document.getElementById('viewBtn');
-            const spine = document.querySelector('.spine-overlay');
-            
-            if (isSingleView) {
-                container.classList.add('single-view');
-                btn.innerText = "دو صفحه‌ای";
-            } else {
-                container.classList.remove('single-view');
-                btn.innerText = "تک صفحه‌ای";
-                if (currentPageIndex % 2 !== 0) {
-                    currentPageIndex--;
-                }
-            }
-            // Trigger Animation re-render
-            updatePaginationDisplay();
-        }
-
-        // --- Navigation ---
-        function getAllPages() { return Array.from(document.querySelectorAll('.page')); }
-
-        function updatePaginationDisplay() {
-            const pages = getAllPages();
-            if (currentPageIndex < 0) currentPageIndex = 0;
-            if (currentPageIndex >= pages.length) currentPageIndex = pages.length - 1;
-
-            pages.forEach(p => {
-                p.classList.add('hidden-page');
-            });
-            
-            const placeholder = document.getElementById('pagePlaceholder');
-            placeholder.style.display = 'none';
-
-            // Animation: Add temp class for entering
-            const applyAnim = (p) => {
-                p.classList.remove('hidden-page');
-            };
-
-            if (isSingleView) {
-                applyAnim(pages[currentPageIndex]);
-            } else {
-                const spreadStart = currentPageIndex % 2 === 0 ? currentPageIndex : currentPageIndex - 1;
-                if (spreadStart < 0) return;
-                
-                if (pages[spreadStart]) applyAnim(pages[spreadStart]);
-                if (pages[spreadStart + 1]) {
-                    applyAnim(pages[spreadStart + 1]);
-                } else {
-                    placeholder.style.display = 'block';
-                }
-            }
-            
-            document.getElementById('pageInfo').innerText = 
-                `${currentPageIndex + 1} / ${pages.length}`;
-        }
-
-        function nextPage() {
-            const pages = getAllPages();
-            const inc = isSingleView ? 1 : 2;
-            if (currentPageIndex + inc < pages.length) {
-                // 1. Animation Logic
-                const currentVisible = document.querySelectorAll('.page:not(.hidden-page)');
-                currentVisible.forEach(p => {
-                    p.style.transform = 'translateY(-10px)';
-                    p.style.opacity = '0';
-                });
-                
-                setTimeout(() => {
-                    currentPageIndex += inc;
-                    updatePaginationDisplay();
-                    // Reset Anim styles
-                    const newVisible = document.querySelectorAll('.page:not(.hidden-page)');
-                    newVisible.forEach(p => {
-                        p.style.transform = 'translateY(10px)'; 
-                        p.offsetWidth; // Trigger reflow
-                        p.style.opacity = '1';
-                        p.style.transform = 'translateY(0)';
-                    });
-                }, 200); // Wait for fade out
-            }
-        }
-
-        function prevPage() {
-            const inc = isSingleView ? 1 : 2;
-            if (currentPageIndex - inc >= 0 || currentPageIndex > 0) {
-                 const currentVisible = document.querySelectorAll('.page:not(.hidden-page)');
-                currentVisible.forEach(p => {
-                    p.style.transform = 'translateY(10px)'; // Move down leaving
-                    p.style.opacity = '0';
-                });
-                
-                setTimeout(() => {
-                    if (currentPageIndex - inc >= 0) currentPageIndex -= inc;
-                    else currentPageIndex = 0;
-                    
-                    updatePaginationDisplay();
-                     
-                    const newVisible = document.querySelectorAll('.page:not(.hidden-page)');
-                    newVisible.forEach(p => {
-                        p.style.transform = 'translateY(-10px)'; // Enter from top
-                        p.offsetWidth;
-                        p.style.opacity = '1';
-                        p.style.transform = 'translateY(0)';
-                    });
-                }, 200);
-            } 
-        }
-
-        // --- Content Logic ---
-        let isPaginating = false;
-        function checkOverflow(content) { 
-            return content.scrollHeight > content.clientHeight + 2; 
-        }
-        
-        function moveContent(curr, next) {
-            let moved = false;
-            let safety = 0;
-            while(checkOverflow(curr) && curr.lastChild && safety < 100) {
-                if (next.firstChild) next.insertBefore(curr.lastChild, next.firstChild);
-                else next.appendChild(curr.lastChild);
-                moved = true;
-                safety++;
-            }
-            return moved;
-        }
-
-        function createPage() {
-            const id = getAllPages().length;
-            const page = document.createElement('article');
-            page.className = 'page hidden-page'; 
-            page.id = 'page-' + id;
-            page.innerHTML = `<div class="page-border"></div><div class="content" contenteditable="true" spellcheck="false"></div>`;
-            
-            const placeholder = document.getElementById('pagePlaceholder');
-            const container = document.getElementById('bookContainer');
-            if(placeholder) container.insertBefore(page, placeholder);
-            else container.appendChild(page);
-
-            attachListeners(page.querySelector('.content'));
-            return page;
-        }
-
-        function triggerPagination() {
-            if (isPaginating) return;
-            isPaginating = true;
-            saveToLocal(); // Auto Save on input change
-            
-            requestAnimationFrame(() => {
-                const pages = getAllPages();
-                let addedNew = false;
-                
-                for(let i=0; i<pages.length; i++) {
-                    const content = pages[i].querySelector('.content');
-                    if (checkOverflow(content)) {
-                        let next = pages[i+1];
-                        if (!next) { 
-                            next = createPage(); 
-                            addedNew = true;
-                        }
-                        moveContent(content, next.querySelector('.content'));
-                    }
-                }
-                isPaginating = false;
-                if(addedNew) updatePaginationDisplay();
-            });
-        }
-
-        // Persian Half-Space Auto-Correct
-        const persianSuffixes = ['ها', 'های', 'هایی', 'تر', 'ترین', 'اند', 'ایم', 'اید', 'ام'];
-        function handlePersianSpacing(event) {
-            if (event.inputType === 'insertText' || event.inputType === 'insertFromPaste') {
-                const selection = window.getSelection();
-                if (!selection.rangeCount) return;
-                const range = selection.getRangeAt(0);
-                const node = range.endContainer;
-                if (node.nodeType === Node.TEXT_NODE) {
-                    const text = node.nodeValue;
-                    const endPos = range.endOffset;
-                    const textBefore = text.substring(0, endPos);
-                    let newTextBefore = textBefore;
-                    let changed = false;
-                    
-                    persianSuffixes.forEach(suffix => {
-                        const pattern = new RegExp(`(\\S) (${suffix})$`); 
-                        if (pattern.test(newTextBefore)) {
-                             newTextBefore = newTextBefore.replace(pattern, '$1\u200C$2');
-                             changed = true;
-                        }
-                    });
-
-                    if (/(^|[\s\u200C])(می|نمی) $/.test(newTextBefore)) {
-                        newTextBefore = newTextBefore.replace(/(می|نمی) $/, '$1\u200C');
-                        changed = true;
-                    }
-
-                    if (changed) {
-                        const textAfter = text.substring(endPos);
-                        node.nodeValue = newTextBefore + textAfter;
-                        const newPos = newTextBefore.length;
-                        const newRange = document.createRange();
-                        newRange.setStart(node, newPos);
-                        newRange.collapse(true);
-                        selection.removeAllRanges();
-                        selection.addRange(newRange);
-                    }
-                }
-            }
-        }
-
-        function attachListeners(el) {
-            el.addEventListener('input', (e) => {
-                handlePersianSpacing(e);
-                triggerPagination();
-            });
-            el.addEventListener('paste', (e) => {
-                e.preventDefault();
-                const text = (e.clipboardData).getData('text/plain');
-                document.execCommand('insertText', false, text);
-            });
-        }
-        
-        // --- Formatting ---
-        function changePaper(color) {
-            document.documentElement.style.setProperty('--paper-color', color);
-            saveToLocal();
-        }
-        function toggleLowQuality() {
-            document.body.classList.toggle('low-quality');
-        }
-        function changeFont(font) {
-            document.documentElement.style.setProperty('--font-current', font);
-            saveToLocal();
-        }
-        function formatStyle(cmd) { document.execCommand(cmd, false, null); }
-        function applyClass(cls) {
-            const sel = window.getSelection();
-            if(!sel.rangeCount) return;
-            const range = sel.getRangeAt(0);
-            const text = range.toString();
-            if(text.length) {
-                const div = document.createElement('div');
-                div.className = cls;
-                div.innerText = text;
-                range.deleteContents();
-                range.insertNode(div);
-                const space = document.createTextNode('\u200B'); range.setStartAfter(div); range.insertNode(space);
-                triggerPagination();
-            }
-        }
-        function detectMode() {
-            const sel = window.getSelection();
-            if (!sel.rangeCount) return;
-            let node = sel.anchorNode;
-            if (node.nodeType === 3) node = node.parentNode;
-            const indicator = document.getElementById('modeIndicator');
-            if (node.classList.contains('dialogue-style')) {
-                indicator.innerText = "حالت: گفتگو"; indicator.classList.add('active');
-            } else if (node.classList.contains('poetry-style')) {
-                indicator.innerText = "حالت: شعر"; indicator.classList.add('active');
-            } else { indicator.classList.remove('active'); }
-        }
-
-        // --- Raw Mode ---
-        function openRawMode() {
-            const pages = getAllPages();
-            let fullText = "";
-            pages.forEach(p => {
-                // Use innerText to get newlines, but we might want to be smarter
-                // Replace multiple newlines with single for clean editing, or keep exact?
-                // Let's keep exact text content.
-                let text = p.querySelector('.content').innerText;
-                // Trim end newlines to avoid massive gaps? No, keep it raw.
-                if (text.trim().length > 0) fullText += text + "\n";
-            });
-            document.getElementById('rawTextarea').value = fullText;
-            document.getElementById('rawModal').classList.add('active');
-        }
-
-        function closeRawMode() {
-            document.getElementById('rawModal').classList.remove('active');
-        }
-
-        function saveRawText() {
-            const raw = document.getElementById('rawTextarea').value;
-            
-            // Rebuild Strategy:
-            // 1. Clear all pages except 0
-            const pages = getAllPages();
-            pages.forEach((p, i) => { if(i > 0) p.remove(); });
-            
-            // 2. Set content of Page 0.
-            // Converting newlines to <div> to ensure line-breaks work well with pagination logic
-            const lines = raw.split('\n');
-            let html = "";
-            lines.forEach(line => {
-                if (line.trim() !== "") html += `<div>${line}</div>`;
-                else html += `<div><br></div>`;
-            });
-            
-            const p0box = document.getElementById('page-0').querySelector('.content');
-            p0box.innerHTML = html;
-            
-            closeRawMode();
-            
-            // 3. Trigger Pagination Loop
-            currentPageIndex = 0;
-            triggerPagination();
-            updatePaginationDisplay();
-        }
-
-        // Init
-        window.addEventListener('load', () => {
-             attachListeners(document.querySelector('.content')); // Attach to first page
-             restoreFromLocal();
-             updatePaginationDisplay();
-             // Re-attach listeners to restored pages
-             document.querySelectorAll('.content').forEach(attachListeners);
-        });
-
-    </script>
 </body>
 </html>
